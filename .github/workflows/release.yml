@@ -51,8 +51,7 @@ jobs:
       - name: Generate release info
         id: info
         run: |
-          mkdir -p dist/artifacts
-          echo ${{ steps.meta.outputs.tags }} > ./dist/artifacts/images.txt
+          echo ${{ steps.meta.outputs.tags }} > images.txt
           echo "::set-output name=version::$(echo $GITHUB_REF | cut -d / -f 3)"
           echo "🍻" > release.txt
 
@@ -62,4 +61,4 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           body_path: release.txt
-          files: 'dist/*'
+          files: images.txt
