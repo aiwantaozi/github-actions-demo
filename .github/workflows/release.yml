@@ -6,6 +6,7 @@ on:
   push:
     tags:
       - v*
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -14,38 +15,56 @@ jobs:
         node-version: [14.16]
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
     steps:
-    - uses: actions/checkout@v2
-    - run: make ci
+      - name: Clone
+        uses: actions/checkout@v2
 
-    - name: Generate release info
-      id: info
-      run: |
-        echo "::set-output name=version::$(echo $GITHUB_REF | cut -d / -f 3)"
-        echo "🍻" > release.txt
+      - name: Run precheck
+        run: make precheck
 
-    - name: Release
-      uses: softprops/action-gh-release@v1
-      if: startsWith(github.ref, 'refs/tags/')
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        prerelease: true
-        body_path: release.txt
-        files: 'dist/*'
+      - name: Copy binary
+        run: |
+          cd package
+          cp ../bin/github-actions-demo .
 
-    - name: Log in to the Container registry
-      uses: docker/login-action@v1
-      with:
-        registry: ${{ secrets.REGISTRY }}
-        username: ${{ secrets.DOCKERHUB_USERNAME }}
-        password: ${{ secrets.DOCKERHUB_PASSWORD }}
+      - name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          registry: ${{ secrets.REGISTRY }}
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
-    - name: Publish to Registry
-      uses: elgohr/Publish-Docker-Github-Action@master
-      if: startsWith(github.ref, 'refs/tags/')
-      with:
-        name: michelia/github-actions-demo
-        username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
-        registry: ${{ secrets.REGISTRY }}
-        tag_names: true
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v3
+        with:
+          images: ${{ secrets.REGISTRY }}/micheliac/github-actions-demo
+
+      - name: Build and push
+        uses: docker/build-push-action@v2
+        with:
+          context: ./package/
+          file: ./package/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Generate release info
+        id: info
+        run: |
+          echo "::set-output name=version::$(echo $GITHUB_REF | cut -d / -f 3)"
+          echo "🍻" > release.txt
+
+      - name: Save image
+        run: |
+          mkdir -p dist/artifacts
+          docker save ${{ steps.meta.outputs.tags }} | gzip > ./dist/artifacts/github-actions-demo-${{ steps.meta.outputs.version }}.tar.gz
+
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          prerelease: true
+          body_path: release.txt
+          files: 'dist/*'
