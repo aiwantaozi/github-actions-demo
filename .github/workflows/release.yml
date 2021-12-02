@@ -51,15 +51,10 @@ jobs:
       - name: Generate release info
         id: info
         run: |
+          mkdir -p dist/artifacts
+          echo ${{ steps.meta.outputs.tags }} > ./dist/artifacts/images.txt
           echo "::set-output name=version::$(echo $GITHUB_REF | cut -d / -f 3)"
           echo "🍻" > release.txt
-
-      - name: Save artifacts
-        run: |
-          mkdir -p dist/artifacts
-          cd dist/artifacts
-          docker save ${{ steps.meta.outputs.tags }} -o github-actions-demo.tar
-          gzip github-actions-demo.tar
 
       - name: Release
         uses: softprops/action-gh-release@v1
