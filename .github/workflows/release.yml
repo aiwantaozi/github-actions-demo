@@ -54,17 +54,15 @@ jobs:
           echo "::set-output name=version::$(echo $GITHUB_REF | cut -d / -f 3)"
           echo "🍻" > release.txt
 
-      - name: Save image
+      - name: Save artifacts
         run: |
           mkdir -p dist/artifacts
           docker save ${{ steps.meta.outputs.tags }} | gzip > ./dist/artifacts/github-actions-demo-${{ steps.meta.outputs.version }}.tar.gz
 
       - name: Release
         uses: softprops/action-gh-release@v1
-        if: startsWith(github.ref, 'refs/tags/')
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          prerelease: true
           body_path: release.txt
           files: 'dist/*'
