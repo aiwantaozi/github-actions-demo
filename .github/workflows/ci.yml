@@ -17,14 +17,16 @@ jobs:
         node-version: [14.16]
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
     steps:
-    - uses: actions/checkout@v2
-    - run: make ci
+    - name: Clone
+      uses: actions/checkout@v2
 
-    - name: Generate release info
-      id: info
+    - name: Run precheck
+      run: make precheck
+
+    - name: Copy binary
       run: |
-        echo "::set-output name=version::$(echo $GITHUB_REF | cut -d / -f 3)"
-        echo "🍻" > release.txt
+        cd package
+        cp ../bin/github-actions-demo .
 
     - name: Login to DockerHub
       uses: docker/login-action@v1
@@ -33,6 +35,24 @@ jobs:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
 
-    - name: Publish to Registry
+    - name: Extract metadata (tags, labels) for Docker
+      id: meta
+      uses: docker/metadata-action@v3
+      with:
+        images: ${{ secrets.REGISTRY }}/micheliac/github-actions-demo
+        tags: saic-master-head
+
+    - name: Build and push
+      uses: docker/build-push-action@v2
+      with:
+        context: ./package/
+        file: ./package/Dockerfile
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+
+    - name: Generate release info
+      id: info
       run: |
-        docker push ${{ secrets.REGISTRY }}/michelia/github-actions-demo:latest
+        echo "::set-output name=version::$(echo $GITHUB_REF | cut -d / -f 3)"
+        echo "🍻" > release.txt
