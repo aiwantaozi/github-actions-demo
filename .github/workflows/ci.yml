@@ -27,10 +27,10 @@ jobs:
         echo "🍻" > release.txt
 
     - name: Publish to Registry
-      uses: zenato/docker-action@master
+      uses: julioarruda/pushimagetoregistry@v1
       if: startsWith(github.ref, 'refs/heads/main')
       with:
-        repository: michelia/github-actions-demo
-        username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
-        registry: ${{ secrets.REGISTRY }}
+        acr-imagename: michelia/github-actions-demo
+        acr-tokenname: ${{ secrets.DOCKER_USERNAME }}
+        acr-token: ${{ secrets.DOCKER_PASSWORD }}
+        acr-account: ${{ secrets.REGISTRY }}
