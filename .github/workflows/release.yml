@@ -38,6 +38,7 @@ jobs:
         uses: docker/metadata-action@v3
         with:
           images: ${{ secrets.REGISTRY }}/micheliac/github-actions-demo
+          tags: type=ref,event=tag
 
       - name: Build and push
         uses: docker/build-push-action@v2
@@ -51,7 +52,7 @@ jobs:
       - name: Generate release info
         id: info
         run: |
-          echo ${{ steps.meta.outputs.tags }} > images.txt
+          echo "${{ steps.meta.outputs.tags }}" > images.txt
           echo "::set-output name=version::$(echo $GITHUB_REF | cut -d / -f 3)"
           echo "🍻" > release.txt
 
