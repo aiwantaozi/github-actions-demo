@@ -1,20 +1,10 @@
-//go:generate go run pkg/codegen/cleanup/main.go
-//go:generate /bin/rm -rf pkg/generated
-//go:generate go run pkg/codegen/main.go
-
 package main
 
 import (
-	//"context"
 	"flag"
-	//"github/aiwantaozi/github-actions-demo/pkg/foo"
-	//"github/aiwantaozi/github-actions-demo/pkg/generated/controllers/some.api.group"
-	"github/aiwantaozi/github-actions-demo/pkg/version"
-	//"github.com/rancher/wrangler/pkg/kubeconfig"
-	//"github.com/rancher/wrangler/pkg/signals"
-	//"github.com/rancher/wrangler/pkg/start"
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
+	"github/aiwantaozi/github-actions-demo/pkg/version"
 	"os"
 )
 
@@ -29,8 +19,8 @@ func main() {
 	app.Usage = "testy needs help!"
 	app.Flags = []cli.Flag{
 		cli.StringFlag{
-			Name:   "kubeconfig",
-			EnvVar: "KUBECONFIG",
+			Name:        "kubeconfig",
+			EnvVar:      "KUBECONFIG",
 			Destination: &KubeConfig,
 		},
 	}
@@ -45,23 +35,4 @@ func run(c *cli.Context) {
 	flag.Parse()
 
 	logrus.Info("Starting controller")
-	//ctx := signals.SetupSignalHandler(context.Background())
-	//
-	//kubeConfig, err := kubeconfig.GetNonInteractiveClientConfig(KubeConfig).ClientConfig()
-	//if err != nil {
-	//	logrus.Fatalf("failed to find kubeconfig: %v", err)
-	//}
-	//
-	//foos, err := some.NewFactoryFromConfig(kubeConfig)
-	//if err != nil {
-	//	logrus.Fatalf("Error building sample controllers: %s", err.Error())
-	//}
-	//
-	//foo.Register(ctx, foos.Some().V1().Foo())
-	//
-	//if err := start.All(ctx, 2, foos); err != nil {
-	//	logrus.Fatalf("Error starting: %s", err.Error())
-	//}
-
-	//<-ctx.Done()
 }
