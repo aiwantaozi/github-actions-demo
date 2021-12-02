@@ -57,7 +57,9 @@ jobs:
       - name: Save artifacts
         run: |
           mkdir -p dist/artifacts
-          docker save ${{ steps.meta.outputs.tags }} | gzip > ./dist/artifacts/github-actions-demo-${{ steps.meta.outputs.version }}.tar.gz
+          cd dist/artifacts
+          docker save ${{ steps.meta.outputs.tags }} -o github-actions-demo.tar
+          gzip github-actions-demo.tar
 
       - name: Release
         uses: softprops/action-gh-release@v1
