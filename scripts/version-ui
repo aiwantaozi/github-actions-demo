@@ -1,0 +1,5 @@
+#!/bin/bash
+
+UI_REPO=${UI_REPO:-"harvester/dashboard"}
+UI_BRANCH=${UI_BRANCH:-"master"}
+UI_VERSION=${UI_VERSION:-"c71245"}

@@ -1,0 +1,26 @@
+#!/bin/bash
+set -e
+
+source $(dirname $0)/version
+source $(dirname $0)/version-ui
+cd $(dirname $0)/..
+
+echo "Start building UI package"
+
+REPO_URL_PREFIX="git@github.com:"
+if [ x"${ACCESS_TOKEN}" != x"" ];then
+  REPO_URL_PREFIX="https://${ACCESS_TOKEN}@github.com/"
+fi
+
+git clone --branch ${UI_BRANCH} --single-branch ${REPO_URL_PREFIX}${UI_REPO}.git ../ui
+cd ../ui
+git checkout -b ui ${UI_VERSION}
+
+cd ./scripts
+./build-embedded
+
+cd ..
+MAIN_REPO_DIR=../github-actions-demo
+mkdir -p ${MAIN_REPO_DIR}/bin
+cp -r dist/ui.tar.gz ${MAIN_REPO_DIR}/bin/
+
