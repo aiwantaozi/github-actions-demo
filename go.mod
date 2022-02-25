@@ -2,15 +2,11 @@ module github/aiwantaozi/github-actions-demo
 
 go 1.16
 
-replace k8s.io/client-go => k8s.io/client-go v0.18.0
-
 require (
-	github.com/rancher/wrangler v0.8.9
+	github.com/cpuguy83/go-md2man/v2 v2.0.0 // indirect
+	github.com/konsorten/go-windows-terminal-sequences v1.0.2 // indirect
 	github.com/sirupsen/logrus v1.4.2
+	github.com/stretchr/testify v1.7.0 // indirect
 	github.com/urfave/cli v1.22.2
-	k8s.io/api v0.18.8
-	k8s.io/apiextensions-apiserver v0.18.0
-	k8s.io/apimachinery v0.18.8
-	k8s.io/client-go v0.18.8
-	k8s.io/code-generator v0.18.0
+	golang.org/x/sys v0.0.0-20201119102817-f84b799fce68 // indirect
 )
