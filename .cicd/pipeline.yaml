@@ -1,0 +1,125 @@
+apiVersion: tekton.dev/v1alpha1
+kind: Pipeline
+metadata:
+  name: pipeline-git-clone-build-push-deploy
+spec:
+  description: |
+    this pipeline offers a typical CI/CD process, with a flow including:
+    - fetching a git repository as the source
+    - using buildah to build a Docker image by Dockerfile
+    - pusing the built Docker image to a desired repository
+    - deploying it to Kubernetes cluster
+
+  # Parameters
+  params:
+    # clone params
+    - name: repo-url
+      type: string
+      description: The git repository URL to clone from.
+      default: https://github.com/aiwantaozi/github-actions-demo
+    - name: revision
+      type: string
+      description: The git tag to clone.
+      default: main
+    - name: httpProxy
+      default: http://192.168.0.102:7890
+    - name: httpsProxy
+      default: http://192.168.0.102:7890
+    - name: noProxy
+      default: localhost,127.0.0.1,10.96.0.0/12,192.168.99.0/24,192.168.39.0/24,192.168.59.0/24,192.168.49.0/24,0.96.0.0/12
+    - name: verbose
+      default: "true"
+    # build
+    - name: package
+      default: "github.com/aiwantaozi/github-actions-demo"
+    - name: packages
+      default: "."
+    # image
+    - name: image-full-path-with-tag
+      type: string
+      default: micheliac/pipeline-test:latest
+      description: The image full path to host the built image, with version tag, e.g. image-registry.openshift-image-registry.svc:5000/tekton-pipelines/spring-boot-docker:v1.0.0.
+    - name: dockerfile
+      type: string
+      default: package/Dockerfile
+    - name: deployment-manifest
+      type: string
+      description: The manifest file for deployment.
+
+  # Workspaces
+  workspaces:
+    - name: workspace
+    - name: empty-dir
+    - name: ssh-directory
+    - name: dockerconfig
+    - name: manifest-dir
+    - name: kubeconfig-dir
+
+  # Taksks
+  tasks:
+    # 1. Task - fetch-repository
+    - name: fetch-repository
+      taskRef:
+        name: git-clone
+      params:
+        - name: url
+          value: $(params.repo-url)
+        - name: revision
+          value: $(params.revision)
+        - name: deleteExisting
+          value: "true"
+      workspaces:
+        - name: output
+          workspace: workspace
+        - name: ssh-directory
+          workspace: ssh-directory
+
+    # 2. Task - go build
+    - name: go-build
+      taskRef:
+        name: go-build
+      runAfter:
+        - fetch-repository
+      params:
+        - name: package
+          value: $(params.package)
+        - name: packages
+          value: $(params.packages)
+      workspaces:
+        - name: source
+          workspace: workspace
+
+    # 3. Task - kaniko build & push
+    - name: kaniko
+      taskRef:
+        name: kaniko
+      runAfter:
+        - go-build
+      params:
+        - name: IMAGE
+          value: "$(params.image-full-path-with-tag)"
+        - name: DOCKERFILE
+          value: "$(params.dockerfile)"
+      workspaces:
+        - name: source
+          workspace: workspace
+        - name: dockerconfig
+          workspace: dockerconfig
+
+    # 4. Task - kubectl deploy
+    - name: deploy
+      taskRef:
+        name: kubernetes-actions
+      runAfter:
+        - buildah
+      params:
+        - name: script
+          value: |
+            kubectl apply -f $(params.deployment-manifest)
+            echo "----------"
+            kubectl get deployment
+      workspaces:
+        - name: kubeconfig-dir
+          workspace: kubeconfig-dir
+        - name: manifest-dir
+          workspace: manifest-dir

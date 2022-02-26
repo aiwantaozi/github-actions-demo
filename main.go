@@ -2,10 +2,14 @@ package main
 
 import (
 	"flag"
+	"os"
+	"net/http"
+
 	"github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
+
 	"github/aiwantaozi/github-actions-demo/pkg/version"
-	"os"
+	"github/aiwantaozi/github-actions-demo/pkg/handler"
 )
 
 var (
@@ -34,5 +38,7 @@ func main() {
 func run(c *cli.Context) {
 	flag.Parse()
 
-	logrus.Info("Starting controller")
+	logrus.Info("Starting run")
+	http.HandleFunc("/", handler.HelloHandler)
+	http.ListenAndServe(":8080", nil)
 }
