@@ -3,12 +3,12 @@ package handler
 import (
 	"fmt"
 	"net/http"
-	"github.com/sirupsen/logrus"
+	"log"
 	"time"
 )
 
 func HelloHandler(w http.ResponseWriter, r *http.Request) {
-	logrus.Info("received request", r.URL.String())
+	log.Println("received request", r.URL.String())
 
 	title := "Hello pipeline test, time: "
 	date := time.Now().String()
