@@ -49,6 +49,10 @@ spec:
       default: ""
   workspaces:
     - name: source
+    - name: dockerconfig
+      description: Includes a docker `config.json`
+      optional: true
+      mountPath: /kaniko/.docker
   steps:
     - name: build
       image: docker.io/library/golang:$(params.version)
@@ -61,6 +65,8 @@ spec:
           cd $SRC_PATH
         fi
         go build $(params.flags) $(params.packages)
+        cp github-actions-demo $(workspaces.source.path)/
+        ls $(workspaces.source.path)/
       env:
         - name: GOOS
           value: "$(params.GOOS)"

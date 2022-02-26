@@ -1,0 +1,74 @@
+---
+apiVersion: triggers.tekton.dev/v1alpha1
+kind: TriggerTemplate
+metadata:
+  name: trigger-template
+spec:
+  params:
+    - name: deployment-manifest
+      default: ""
+    - name: httpProxy
+      default: http://192.168.0.102:7890
+    - name: httpsProxy
+      default: http://192.168.0.102:7890
+    - name: image-full-path-with-tag
+      default: micheliac/pipeline-test:latest
+    - name: noProxy
+      default: localhost,127.0.0.1,10.96.0.0/12,192.168.99.0/24,192.168.39.0/24,192.168.59.0/24,192.168.49.0/24,0.96.0.0/12
+    - name: package
+      default: github.com/aiwantaozi/github-actions-demo
+    - name: packages
+      default: .
+    - name: repo-url
+      default: https://github.com/aiwantaozi/github-actions-demo
+    - name: revision
+      default: main
+    - name: verbose
+      default: "true"
+  resourcetemplates:
+    - apiVersion: tekton.dev/v1beta1
+      kind: PipelineRun
+      metadata:
+        generateName: test-pipe-from-webhook-
+      spec:
+        pipelineRef:
+          name: test
+        params:
+          - name: deployment-manifest
+            value: $(tt.params.deployment-manifest)
+          - name: httpProxy
+            value: $(tt.params.httpProxy)
+          - name: httpsProxy
+            value: $(tt.params.httpsProxy)
+          - name: image-full-path-with-tag
+            value: $(tt.params.image-full-path-with-tag)
+          - name: noProxy
+            value: $(tt.params.noProxy)
+          - name: package
+            value: $(tt.params.package)
+          - name: packages
+            value: $(tt.params.packages)
+          - name: repo-url
+            value: $(tt.params.repo-url)
+          - name: revision
+            value: $(tt.params.revision)
+          - name: verbose
+            value: $(tt.params.verbose)
+        workspaces:
+          - name: ssh-directory
+            secret:
+              secretName: my-ssh-credentials
+          - name: dockerconfig
+            secret:
+              secretName: my-dockerconfig
+          - configMap:
+              name: manifests
+            name: manifest-dir
+          - emptyDir: {}
+            name: ""
+          - name: workspace
+            persistentVolumeClaim:
+              claimName: myclaim
+          - name: kubeconfig-dir
+            secret:
+              secretName: kubeconfig

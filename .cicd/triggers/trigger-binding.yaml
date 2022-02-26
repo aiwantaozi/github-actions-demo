@@ -1,0 +1,26 @@
+apiVersion: triggers.tekton.dev/v1alpha1
+kind: TriggerBinding
+metadata:
+  name: trigger-binding
+spec:
+  params:
+    - name: deployment-manifest
+      value: ""
+    - name: httpProxy
+      value: http://192.168.0.102:7890
+    - name: httpsProxy
+      value: http://192.168.0.102:7890
+    - name: image-full-path-with-tag
+      value: micheliac/pipeline-test:latest
+    - name: noProxy
+      value: localhost,127.0.0.1,10.96.0.0/12,192.168.99.0/24,192.168.39.0/24,192.168.59.0/24,192.168.49.0/24,0.96.0.0/12
+    - name: package
+      value: github.com/aiwantaozi/github-actions-demo
+    - name: packages
+      value: .
+    - name: repo-url
+      value: https://github.com/aiwantaozi/github-actions-demo
+    - name: revision
+      value: main
+    - name: verbose
+      value: "true"

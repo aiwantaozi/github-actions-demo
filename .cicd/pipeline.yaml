@@ -39,9 +39,6 @@ spec:
       type: string
       default: micheliac/pipeline-test:latest
       description: The image full path to host the built image, with version tag, e.g. image-registry.openshift-image-registry.svc:5000/tekton-pipelines/spring-boot-docker:v1.0.0.
-    - name: dockerfile
-      type: string
-      default: package/Dockerfile
     # deploy
     - name: deployment-manifest
       type: string
@@ -104,8 +101,6 @@ spec:
       params:
         - name: IMAGE
           value: "$(params.image-full-path-with-tag)"
-        - name: DOCKERFILE
-          value: "$(params.dockerfile)"
       workspaces:
         - name: source
           workspace: workspace
@@ -121,7 +116,7 @@ spec:
       params:
         - name: script
           value: |
-            kubectl apply -f $(params.deployment-manifest)
+            kubectl apply -f $(workspaces.manifest-dir.path)
             echo "----------"
             kubectl get deployment
       workspaces:
