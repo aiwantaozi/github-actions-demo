@@ -1,15 +1,14 @@
 package main
 
 import (
+	"github.com/sirupsen/logrus"
 	"net/http"
-	"log"
 
 	"github/aiwantaozi/github-actions-demo/pkg/handler"
 )
 
 func main() {
-	log.Println("Starting run")
+	logrus.Info("Starting run")
 	http.HandleFunc("/", handler.HelloHandler)
 	http.ListenAndServe(":8080", nil)
 }
-
